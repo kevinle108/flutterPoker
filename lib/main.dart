@@ -144,28 +144,41 @@ class Hand {
 
   String assignPokerHand() {
     List<int> counts = sameCardsList();
-    if (counts.length == 1 && counts[0] == 4) {
+    bool isFlush = _isFlush();
+    bool isStraight = _isStraight();
+    if (isFlush && isStraight && _cards[0].rank == 8) {
+      return 'Royal Flush';
+    }
+    else if (isFlush && isStraight) {
+      return 'Straight Flush';
+    }
+    else if (counts.length == 1 && counts[0] == 4) {
       return 'Four of a Kind';
     }
-    if (counts.length == 1 && counts[0] == 3) {
-      return 'Three of a Kind';
-    }
-    if (counts.length == 2 && counts[0] == 2 && counts[1] == 2) {
-      return 'Two Pair';
-    }
-    if (counts.length == 2 && (
+    else if (counts.length == 2 && (
         (counts[0] == 3 && counts[1] == 2) ||
         (counts[0] == 2 && counts[1] == 3))
     ) {
       return 'Full House';
     }
-    if (counts.length == 2 && counts[0] == 2 && counts[1] == 2) {
+    else if (isFlush && !isStraight) {
+      return 'Flush';
+    }
+    else if (!isFlush && isStraight) {
+      return 'Straight';
+    }
+    else if (counts.length == 1 && counts[0] == 3) {
+      return 'Three of a Kind';
+    }
+    else if (counts.length == 2 && counts[0] == 2 && counts[1] == 2) {
       return 'Two Pair';
     }
-    if (counts.length == 1 && counts[0] == 2) {
+    else if (counts.length == 1 && counts[0] == 2) {
       return 'Pair';
     }
-    else return 'High Card';
+    else {
+      return 'High Card';
+    }
   }
 
   List<int> sameCardsList() {
@@ -192,12 +205,36 @@ class Hand {
   }
 
   bool _isFlush() {
-    // TODO
+    for (int i = 1; i < _cards.length; i++) {
+        if (_cards[i].suit != _cards[0].suit) {
+          return false;
+        }
+    }
+    return true;
+  }
+  bool _isStraight() {
+    int curRank = _cards[0].rank;
+    int nextRank = _cards[1].rank;
+    // check from cards 0 -> 3rd last card
+    for (int i = 0; i < _cards.length-2; i++) {
+        curRank = _cards[i].rank;
+        nextRank = _cards[i+1].rank;
+        if (curRank + 1 != nextRank) {
+          return false;
+        }
+    }
+    // update curRank to be the 2nd last card
+    curRank = nextRank;
+    if (_cards.last.rank == 12 && (curRank == 11 || curRank == 3)) {
+      return true;
+    }
+    if (curRank+1 == _cards.last.rank) {
+      return true;
+    }
     return false;
   }
 
   void shuffle() {
-    // TODO
     List<int> cardIds = [];
     while (cardIds.length < 5) {
       int newId = Random().nextInt(52);
@@ -216,12 +253,50 @@ class Hand {
     for (int i = 0; i < 5; i++) {
       _cards[i] = Card(cardIds[i]);
     }
-    print(sameCardsList());
+    // Begin testing area
+
+    // Royal Flush:
+    // _cards = [Card(32), Card(36), Card(40), Card(44), Card(48)];
+
+    // Straight Flush:
+    // _cards = [Card(0), Card(4), Card(8), Card(12), Card(48)];
+
+    // Four of a Kind:
+    // _cards = [Card(0), Card(1), Card(2), Card(3), Card(4)];
+
+    // Full House:
+    // _cards = [Card(0), Card(1), Card(2), Card(4), Card(5)];
+
+    // Flush:
+    // _cards = [Card(5), Card(17), Card(25), Card(33), Card(45)];
+
+    // Straight:
+    // _cards = [Card(32), Card(37), Card(42), Card(47), Card(48)];
+
+    // Straight:
+    // _cards = [Card(0), Card(5), Card(10), Card(15), Card(48)];
+
+    // Straight:
+    // _cards = [Card(25), Card(28), Card(32), Card(36), Card(40)];
+
+    // Three of a Kind:
+    // _cards = [Card(24), Card(25), Card(27), Card(36), Card(40)];
+
+    // Two Pair:
+    // _cards = [Card(24), Card(25), Card(36), Card(39), Card(40)];
+
+    // Pair:
+    // _cards = [Card(24), Card(25), Card(32), Card(39), Card(40)];
+
+    // High Card:
+    // _cards = [Card(12), Card(28), Card(32), Card(39), Card(40)];
+
+    // End testing area
+
     _pokerHand = assignPokerHand();
   }
 
   String cardImage(int cardIndex) {
-    // TODO
     return cardImages[_cards[cardIndex].id];
   }
 }
